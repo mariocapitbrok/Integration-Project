@@ -6,7 +6,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-export function generateAuthorizationURL() {
+export const generateAuthorizationURL = () => {
   const clientId = process.env.CLIENT_ID;
   const redirectUri = process.env.REDIRECT_URI;
 
@@ -22,9 +22,9 @@ export function generateAuthorizationURL() {
     &scope=${scope}`;
 
   return authorizationUrl;
-}
+};
 
-export async function handleOAuthCallback(code) {
+export const handleOAuthCallback = async (code) => {
   const clientId = process.env.CLIENT_ID;
   const clientSecret = process.env.CLIENT_SECRET;
   const redirectUri = process.env.REDIRECT_URI;
@@ -48,23 +48,23 @@ export async function handleOAuthCallback(code) {
   } catch (error) {
     console.error('Error handling OAuth callback:', error);
   }
-}
+};
 
-export async function fetchAndSaveTasks(accessToken) {
+export const fetchAndSaveTasks = async (accessToken) => {
   //TODO.
   // Make a request to Asana API to fetch tasks
   // Iterate through the tasks and save them to database using Prisma.
-}
+};
 
-export async function fetchAndSaveStories(accessToken) {
+export const fetchAndSaveStories = async (accessToken) => {
   // TODO.
   // Make a request to the Asana API to fetch user-generated stories
   // Iterate through the stories and save them to your database using Prisma
   // Don't forget to associate the story with the task and author
-}
+};
 
-export function handleWebhooks(payload) {
+export const handleWebhooks = (payload) => {
   // TODO
   // Handle incoming webhook payloads
   // Validate the data and save it to your database accordingly
-}
+};
