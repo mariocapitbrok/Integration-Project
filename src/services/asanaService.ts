@@ -8,7 +8,7 @@ dotenv.config();
 
 function generateAuthorizationURL() {
   const clientId = process.env.CLIENT_ID;
-  const redirectUri = process.env.REDIRECT_ID;
+  const redirectUri = process.env.REDIRECT_URI;
 
   const responseType = 'code';
   const state = 'thisIsARandomString';
@@ -22,4 +22,30 @@ function generateAuthorizationURL() {
     &scope=${scope}`;
 
   return authorizationUrl;
+}
+
+async function handleOAuthCallback(code) {
+  const clientId = process.env.CLIENT_ID;
+  const clientSecret = process.env.CLIENT_SECRET;
+  const redirectUri = process.env.REDIRECT_URI;
+
+  const tokenUrl = 'https://app.asana.com/-/oauth_token';
+  const data = {
+    grant_type: 'authorization_code',
+    code,
+    client_id: clientId,
+    client_secret: clientSecret,
+    redirect_uri: redirectUri,
+  };
+
+  try {
+    const response = await axios.post(tokenUrl, data);
+    const accessToken = response.data.access_token;
+
+    // TODO.
+    // Store the accessToken in the database for the user
+    // You should associate it with the user who initiated the OAuth flow
+  } catch (error) {
+    console.error('Error handling OAuth callback:', error);
+  }
 }
