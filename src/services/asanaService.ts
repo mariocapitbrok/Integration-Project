@@ -31,11 +31,11 @@ async function handleOAuthCallback(code) {
 
   const tokenUrl = 'https://app.asana.com/-/oauth_token';
   const data = {
-    grant_type: 'authorization_code',
-    code,
+    grant_type: 'refresh_token',
     client_id: clientId,
     client_secret: clientSecret,
     redirect_uri: redirectUri,
+    code,
   };
 
   try {
@@ -49,3 +49,5 @@ async function handleOAuthCallback(code) {
     console.error('Error handling OAuth callback:', error);
   }
 }
+
+export { generateAuthorizationURL, handleOAuthCallback };
