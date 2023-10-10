@@ -72,19 +72,19 @@ export const handleOAuthCallback = async (code) => {
   }
 };
 
-export const fetchAndSaveUserTasks = async (
+export const fetchAndSaveAllUserTasks = async (
   accessToken,
   assignee,
   workspace,
-  offset = null) => {
-
+  offset = null,
+) => {
   const client = asana.Client.create().useAccessToken(accessToken);
 
   try {
     const response = await client.tasks.getTasks({
       limit: 100, // Adjust the limit as needed
-      assignee, 
-      workspace, 
+      assignee,
+      workspace,
       offset,
     });
 
@@ -121,18 +121,77 @@ export const fetchAndSaveUserTasks = async (
 
     if (response.next_page) {
       const nextPageOffset = response.next_page.offset;
-      await fetchAndSaveUserTasks(accessToken, assignee, workspace, nextPageOffset);
+      await fetchAndSaveAllUserTasks(
+        accessToken,
+        assignee,
+        workspace,
+        nextPageOffset,
+      );
     }
   } catch (error) {
     console.error(error);
   }
 };
 
-export const fetchAndSaveStories = async (accessToken) => {
-  // TODO.
-  // Make a request to the Asana API to fetch user-generated stories
-  // Iterate through the stories and save them to your database using Prisma
-  // Don't forget to associate the story with the task and author
+export const fetchAndSaveAllTaskStories = async (
+  accessToken,
+  taskGID,
+  offset = null,
+) => {
+  const client = asana.Client.create().useAccessToken(accessToken);
+
+  try {
+    const response = await client.tasks.getTaskStories(taskGID, {
+      limit: 100, // Adjust the limit as needed
+      offset,
+    });
+
+    const stories = response.data;
+
+    for (const story of stories) {
+      // Check if the story exists in the database by its GID
+      const existingStory = await prisma.story.findUnique({
+        where: { gid: story.gid },
+      });
+
+      if (existingStory) {
+        // If the story exists, update it
+        await prisma.story.update({
+          where: { gid: story.gid },
+          data: {
+            created_at: new Date(story.created_at),
+            created_by_gid: story.created_by.gid,
+            created_by_name: story.created_by.name,
+            resource_type: story.resource_type,
+            text: story.text,
+            type: story.type,
+            resource_subtype: story.resource_subtype,
+          },
+        });
+      } else {
+        // If the story doesn't exist, create it
+        await prisma.story.create({
+          data: {
+            gid: story.gid,
+            created_at: new Date(story.created_at),
+            created_by_gid: story.created_by.gid,
+            created_by_name: story.created_by.name,
+            resource_type: story.resource_type,
+            text: story.text,
+            type: story.type,
+            resource_subtype: story.resource_subtype,
+          },
+        });
+      }
+    }
+
+    if (response.next_page) {
+      const nextPageOffset = response.next_page.offset;
+      await fetchAndSaveAllTaskStories(taskGID, nextPageOffset);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const handleWebhooks = (payload) => {
