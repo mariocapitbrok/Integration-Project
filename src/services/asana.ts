@@ -83,8 +83,8 @@ export const fetchAndSaveUserTasks = async (
   try {
     const response = await client.tasks.getTasks({
       limit: 100, // Adjust the limit as needed
-      assignee, // Your assignee parameter
-      workspace, // Your workspace parameter
+      assignee, 
+      workspace, 
       offset,
     });
 
