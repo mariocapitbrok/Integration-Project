@@ -16,6 +16,7 @@ model User {
   name      String?
 
   gAuthCredentials GAuthCredentials?
+  asanaAuthCredentials AsanaAuthCredentials?
 
   filesHaveAccessTo File[]
   commentsAuthored CommentAuthor[]
@@ -26,9 +27,9 @@ model User {
 
 
 model GAuthCredentials {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int @unique
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int    @unique
 
   googleId String
   accessToken  String
@@ -48,6 +49,14 @@ model GAuthCredentials {
   dbUpdatedAt DateTime @updatedAt @default(now())
 }
 
+model AsanaAuthCredentials {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int      @unique
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+}
 
 model File {
   id     Int  @id @default(autoincrement())
@@ -134,3 +143,4 @@ model CommentAuthor {
 
   @@index([userId])
 }
+
