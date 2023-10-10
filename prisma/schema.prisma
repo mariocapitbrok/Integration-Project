@@ -144,3 +144,10 @@ model CommentAuthor {
   @@index([userId])
 }
 
+model Task {
+  id              Int      @id @default(autoincrement())
+  gid             String   @unique
+  name            String
+  resource_type   String
+  resource_subtype String
+}
