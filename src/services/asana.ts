@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { PrismaClient, AsanaAuthCredentials } from '@prisma/client';
+import asana from 'asana';
 
 const prisma = new PrismaClient();
 const dotenv = require('dotenv');
@@ -71,10 +72,60 @@ export const handleOAuthCallback = async (code) => {
   }
 };
 
-export const fetchAndSaveTasks = async (accessToken) => {
-  //TODO.
-  // Make a request to Asana API to fetch tasks
-  // Iterate through the tasks and save them to database using Prisma.
+export const fetchAndSaveUserTasks = async (
+  accessToken,
+  assignee,
+  workspace,
+  offset = null) => {
+
+  const client = asana.Client.create().useAccessToken(accessToken);
+
+  try {
+    const response = await client.tasks.getTasks({
+      limit: 100, // Adjust the limit as needed
+      assignee, // Your assignee parameter
+      workspace, // Your workspace parameter
+      offset,
+    });
+
+    const tasks = response.data;
+
+    for (const task of tasks) {
+      // Check if the task exists in the database by its GID
+      const existingTask = await prisma.task.findUnique({
+        where: { gid: task.gid },
+      });
+
+      if (existingTask) {
+        // If the task exists, update it
+        await prisma.task.update({
+          where: { gid: task.gid },
+          data: {
+            name: task.name,
+            resource_type: task.resource_type,
+            resource_subtype: task.resource_subtype,
+          },
+        });
+      } else {
+        // If the task doesn't exist, create it
+        await prisma.task.create({
+          data: {
+            gid: task.gid,
+            name: task.name,
+            resource_type: task.resource_type,
+            resource_subtype: task.resource_subtype,
+          },
+        });
+      }
+    }
+
+    if (response.next_page) {
+      const nextPageOffset = response.next_page.offset;
+      await fetchAndSaveUserTasks(accessToken, assignee, workspace, nextPageOffset);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const fetchAndSaveStories = async (accessToken) => {
