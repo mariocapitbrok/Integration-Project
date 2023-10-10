@@ -151,3 +151,15 @@ model Task {
   resource_type   String
   resource_subtype String
 }
+
+model Story {
+  id             Int       @id @default(autoincrement())
+  gid            String    @unique
+  created_at     DateTime
+  created_by_gid String
+  created_by_name String
+  resource_type  String
+  text           String
+  type           String
+  resource_subtype String?
+}
