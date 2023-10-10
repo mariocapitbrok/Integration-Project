@@ -4,7 +4,7 @@
   "main": "index.js",
   "repository": "https://github.com/General-Collaboration/Integration-Project.git",
   "dependencies": {
-    "@prisma/client": "5.3.1",
+    "@prisma/client": "^5.4.2",
     "asana": "^1.0.2",
     "axios": "^1.5.1",
     "bun": "^1.0.4",
